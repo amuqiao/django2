@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.http.response import JsonResponse,HttpResponseRedirect
+from django.http.response import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from models import *
 from hashlib import sha1  # sha1加密
@@ -13,6 +13,7 @@ def register(request):
     """
     context = {'title': '用户注册'}
     return render(request, "df_user/register.html", context)
+
 
 def register_handle(request):
     """
@@ -49,10 +50,12 @@ def register_handle(request):
     # 注册成功,redirect重定向到登陆界面
     return redirect('/user/login/')
 
+
 def register_exist(request):
     uname = request.GET.get('uname')
     count = UserInfo.objects.filter(uname=uname).count()
     return JsonResponse({'count': count})
+
 
 def login(request):
     """
@@ -60,8 +63,13 @@ def login(request):
     """
     # 获取cookie中uname的值,若不存在,初始化为空
     uname = request.COOKIES.get('uname', '')
-    context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 0, 'uname': uname}
+    context = {
+        'title': '用户登录',
+        'error_name': 0,
+        'error_pwd': 0,
+        'uname': uname}
     return render(request, 'df_user/login.html', context)
+
 
 def login_handle(request):
     """
@@ -97,11 +105,22 @@ def login_handle(request):
             request.session['user_name'] = uname
             return red
         else:
-            context = {'title': '用户登录', 'error_name': 0, 'error_pwd': 1, 'uname': uname, 'upwd': upwd}
+            context = {
+                'title': '用户登录',
+                'error_name': 0,
+                'error_pwd': 1,
+                'uname': uname,
+                'upwd': upwd}
             return render(request, 'df_user/login.html', context)
     else:
-        context = {'title': '用户登录', 'error_name': 1, 'error_pwd': 0, 'uname': uname, 'upwd': upwd}
+        context = {
+            'title': '用户登录',
+            'error_name': 1,
+            'error_pwd': 0,
+            'uname': uname,
+            'upwd': upwd}
         return render(request, 'df_user/login.html', context)
+
 
 def logout(request):
     """
@@ -110,3 +129,45 @@ def logout(request):
     """
     request.session.flush()
     return redirect('/')
+
+
+def info(request):
+    """
+    显示用户信息
+    显示最近浏览商品信息
+    """
+    user_email = UserInfo.objects.get(id=request.session['user_id']).uemail
+    context = {'title': '用户中心',
+               'user_email': user_email,
+               # 从session中读取用户名
+               'user_name': request.session['user_name'],
+               'page_name': 1,
+               }
+    return render(request, 'df_user/user_center_info.html', context)
+
+
+def order(request):
+    """
+    显示订单信息
+    """
+    return render(request, 'df_user/user_center_order.html')
+
+
+def site(request):
+    """
+    用户中心:地址页
+    用户修改地址信息
+    """
+    # 从session中读取用户信息,显示用户登陆状态
+    user = UserInfo.objects.get(id=request.session['user_id'])
+    # 用户修改地址信息提交时触发
+    if request.method == 'POST':
+        post = request.POST
+        user.ushou = post.get('ushou')
+        user.uaddress = post.get('uaddress')
+        user.uyoubian = post.get('uyoubian')
+        user.uphone = post.get('uphone')
+        user.save()
+    context = {'title': '用户中心', 'user': user,
+               'page_name': 1}
+    return render(request, 'df_user/user_center_site.html', context)
