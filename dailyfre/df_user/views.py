@@ -3,6 +3,7 @@ from django.http.response import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from models import *
 from hashlib import sha1  # sha1加密
+import user_decorator
 
 # Create your views here.
 
@@ -131,6 +132,7 @@ def logout(request):
     return redirect('/')
 
 
+@user_decorator.login
 def info(request):
     """
     显示用户信息
@@ -146,6 +148,7 @@ def info(request):
     return render(request, 'df_user/user_center_info.html', context)
 
 
+@user_decorator.login
 def order(request):
     """
     显示订单信息
@@ -153,6 +156,7 @@ def order(request):
     return render(request, 'df_user/user_center_order.html')
 
 
+@user_decorator.login
 def site(request):
     """
     用户中心:地址页
