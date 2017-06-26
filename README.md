@@ -1,2 +1,2 @@
 # django2
-once more
+django once more
